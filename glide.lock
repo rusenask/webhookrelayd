@@ -1,0 +1,40 @@
+hash: 51063d6ad8422e3d6548ce0a66fc714d2e5fc131115eea2ccbcc09adb73b3360
+updated: 2016-12-29T20:46:58.223556581+02:00
+imports:
+- name: github.com/golang/protobuf
+  version: 4bd1920723d7b7c925de087aa32e2187708897f7
+  subpackages:
+  - proto
+- name: github.com/hashicorp/go-cleanhttp
+  version: ad28ea4487f05916463e2423a55166280e8254b5
+- name: github.com/hashicorp/go-retryablehttp
+  version: 6e85be8fee1dcaa02c0eaaac2df5a8fbecf94145
+- name: github.com/Sirupsen/logrus
+  version: 380f64d344b252a007a59baa61f31820f59cba89
+- name: golang.org/x/net
+  version: d4c55e66d8c3a2f3382d264b08e3e3454a66355a
+  subpackages:
+  - context
+  - http2
+  - http2/hpack
+  - internal/timeseries
+  - lex/httplex
+  - trace
+- name: golang.org/x/sys
+  version: eb2c74142fd19a79b3f237334c7384d5167b1b46
+  subpackages:
+  - unix
+- name: google.golang.org/grpc
+  version: c8105071640ef29fce843ed96983e864bb18eb0e
+  subpackages:
+  - codes
+  - credentials
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - peer
+  - stats
+  - tap
+  - transport
+testImports: []

@@ -1,0 +1,11 @@
+package: github.com/rusenask/webhookrelayd
+import:
+- package: github.com/Sirupsen/logrus
+- package: github.com/golang/protobuf
+  subpackages:
+  - proto
+- package: github.com/hashicorp/go-retryablehttp
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: google.golang.org/grpc
