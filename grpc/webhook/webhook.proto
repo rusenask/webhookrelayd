@@ -40,6 +40,8 @@ message Request {
     bytes body = 2;
 
     Header header = 3;    
+
+    string Method = 4;
 }
 
 message WebhookFilter {    
