@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/rusenask/webhookrelayd/grpc/client"
+	"github.com/rusenask/webhookrelayd/relay"
 )
 
 // Version - client version
@@ -70,7 +71,11 @@ func main() {
 		opts.Address = fmt.Sprintf("%s:%d", DefaultServerAddress, DefaultServerPort)
 	}
 
-	c := client.NewDefaultClient(&opts)
+	// getting relayer
+	rOpts := &relay.Opts{Retries: 5}
+	relayer := relay.NewDefaultRelayer(rOpts)
+
+	c := client.NewDefaultClient(&opts, relayer)
 
 	c.StartRelay(&client.Filter{})
 }
