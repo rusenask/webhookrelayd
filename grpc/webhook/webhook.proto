@@ -1,0 +1,48 @@
+syntax = "proto3";
+package webhook;
+
+
+// The Webhook service definition.
+service Webhook {   
+  // Get all Webhook requests with filter - A server-to-client streaming RPC.
+  rpc GetWebhooks(WebhookFilter) returns (stream WebhookRequest) {} 
+}
+
+// Request message for creating a new customer
+message WebhookRequest {
+
+  // bucket info
+  Bucket bucket = 1;
+
+  // incomming request
+  Request request = 2;
+}
+
+// Bucket - bucket info
+message Bucket {
+    string id = 1;
+    string name = 2;
+}
+
+message HeaderValue {
+    repeated string values = 1;
+}
+
+message Header {
+    map<string, HeaderValue> headers = 3;
+}
+
+// Request - incomming request to webhook relay service
+message Request {
+    // desired destination
+    string destination = 1;
+    // request body
+    bytes body = 2;
+
+    Header header = 3;    
+}
+
+message WebhookFilter {    
+  string bucket = 1;
+  string destination = 2;
+}
