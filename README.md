@@ -23,3 +23,20 @@ To start - register an account here https://webhookrelay.com/register. Then:
 * 6. Start _webhookrelayd_:
 
     ./webhookrelayd -k 4c7cff17-8726-431b-a6bc-82d6def0bdc8 -s Xf9DgBjhHjqH
+
+
+## Build
+
+    go build
+
+## Build Image 
+
+Building image is as simple as:
+
+    make image 
+
+
+Start it:
+
+    docker run -it webhookrelay/webhookrelayd -k 4c7cff17-8726-431b-a6bc-82d6def0bdc8 -s Xf9DgBjhHjqH
+    
