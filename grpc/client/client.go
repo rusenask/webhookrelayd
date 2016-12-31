@@ -116,9 +116,13 @@ func (c *DefaultClient) getWebhooks(client pb.WebhookClient, filter *pb.WebhookF
 				"error":       err,
 				"destination": whRequest.Request.Destination,
 				"method":      whRequest.Request.Method,
-			}).Error("webhooks stream handler: failed to relay webhook request")
+			}).Error("failed to relay webhook request")
 		}
-		log.Printf("request: %v", whRequest)
+
+		log.WithFields(log.Fields{
+			"bucket":      whRequest.Bucket.Name,
+			"destination": whRequest.Request.Destination,
+		}).Info("webhook request relayed")
 	}
 
 	return nil
