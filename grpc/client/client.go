@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"io"
 	"time"
 
@@ -87,7 +88,7 @@ func (c *DefaultClient) StartRelay(filter *Filter) error {
 
 	client := pb.NewWebhookClient(conn)
 	log.WithFields(log.Fields{
-		"host": address,
+		"host": c.opts.Address,
 	}).Info("webhookrelayd: connected...")
 
 	fl := &pb.WebhookFilter{Bucket: filter.Bucket, Destination: filter.Destination}
@@ -98,7 +99,7 @@ func (c *DefaultClient) getWebhooks(client pb.WebhookClient, filter *pb.WebhookF
 	// calling the streaming API
 	stream, err := client.GetWebhooks(context.Background(), filter)
 	if err != nil {
-		log.Fatalf("Error on get customers: %v", err)
+		return fmt.Errorf("error while getting webhooks: %s", err)
 	}
 	for {
 		whRequest, err := stream.Recv()
@@ -106,7 +107,9 @@ func (c *DefaultClient) getWebhooks(client pb.WebhookClient, filter *pb.WebhookF
 			break
 		}
 		if err != nil {
-			log.Fatalf("%v.GetWebhooks(_) = _, %v", client, err)
+			log.WithFields(log.Fields{
+				"error": err,
+			}).Error("failed to get stream from server")
 			return err
 		}
 
@@ -117,6 +120,7 @@ func (c *DefaultClient) getWebhooks(client pb.WebhookClient, filter *pb.WebhookF
 				"destination": whRequest.Request.Destination,
 				"method":      whRequest.Request.Method,
 			}).Error("failed to relay webhook request")
+			continue
 		}
 
 		log.WithFields(log.Fields{
