@@ -7,6 +7,8 @@ import (
 
 	"github.com/rusenask/webhookrelayd/grpc/client"
 	"github.com/rusenask/webhookrelayd/relay"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // Version - client version
@@ -24,6 +26,7 @@ Server Options:
     -k, --key <key>                  Bind to host address (default: 0.0.0.0)
     -s, --secret <secret>            Access secret to use
     -a, --address <address>          Address of the webhook-relay server to connect (default: api.webhookrelay.com)
+	-i, --insecure 					 Allow insecure connections (i.e. example your output destination doesn't have trusted cert)
 
 Common Options:
     -h, --help                       Show this message
@@ -38,7 +41,9 @@ func usage() {
 
 func main() {
 	// Server Options
-	opts := client.Opts{}
+	opts := client.Opts{RequireTLS: true}
+
+	rOpts := &relay.Opts{Retries: 5}
 
 	var showVersion bool
 
@@ -51,6 +56,9 @@ func main() {
 
 	flag.BoolVar(&opts.Debug, "D", false, "Enable Debug logging.")
 	flag.BoolVar(&opts.Debug, "debug", false, "Enable Debug logging.")
+
+	flag.BoolVar(&rOpts.Insecure, "i", false, "Enable insecure connections")
+	flag.BoolVar(&rOpts.Insecure, "insecure", false, "Enable insecure connections")
 
 	flag.StringVar(&opts.Address, "a", "", "Server address to connect to")
 	flag.StringVar(&opts.Address, "address", "", "Server address to connect to")
@@ -72,10 +80,8 @@ func main() {
 	}
 
 	// getting relayer
-	rOpts := &relay.Opts{Retries: 5}
 	relayer := relay.NewDefaultRelayer(rOpts)
 
 	c := client.NewDefaultClient(&opts, relayer)
-
-	c.StartRelay(&client.Filter{})
+	log.Fatal(c.StartRelay(&client.Filter{}))
 }

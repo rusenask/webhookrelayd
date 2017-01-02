@@ -1,14 +1,15 @@
 package client
 
 import (
+	"fmt"
 	"io"
 	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	pb "github.com/rusenask/webhookrelayd/grpc/webhook"
-
 	"github.com/rusenask/webhookrelayd/relay"
 
 	log "github.com/Sirupsen/logrus"
@@ -31,6 +32,7 @@ const (
 
 type loginCreds struct {
 	AccessKey, AccessSecret string
+	RequireTLS              bool
 }
 
 func (c *loginCreds) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
@@ -41,12 +43,13 @@ func (c *loginCreds) GetRequestMetadata(context.Context, ...string) (map[string]
 }
 
 func (c *loginCreds) RequireTransportSecurity() bool {
-	return false
+	return c.RequireTLS
 }
 
 // Opts - client configuration
 type Opts struct {
 	Address, AccessKey, AccessSecret string
+	RequireTLS                       bool
 	Debug                            bool
 }
 
@@ -68,13 +71,19 @@ func NewDefaultClient(opts *Opts, relayer relay.Relayer) *DefaultClient {
 func (c *DefaultClient) StartRelay(filter *Filter) error {
 	// Set up a connection to the gRPC server.
 	opts := []grpc.DialOption{
-		grpc.WithInsecure(),
 		grpc.WithPerRPCCredentials(&loginCreds{
 			AccessKey:    c.opts.AccessKey,
 			AccessSecret: c.opts.AccessSecret,
+			RequireTLS:   c.opts.RequireTLS,
 		}),
 		grpc.WithTimeout(5 * time.Second),
 		grpc.WithBackoffMaxDelay(5 * time.Second),
+	}
+
+	if c.opts.RequireTLS {
+		opts = append(opts, grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")))
+	} else {
+		opts = append(opts, grpc.WithInsecure())
 	}
 
 	conn, err := grpc.Dial(c.opts.Address, opts...)
@@ -87,7 +96,7 @@ func (c *DefaultClient) StartRelay(filter *Filter) error {
 
 	client := pb.NewWebhookClient(conn)
 	log.WithFields(log.Fields{
-		"host": address,
+		"host": c.opts.Address,
 	}).Info("webhookrelayd: connected...")
 
 	fl := &pb.WebhookFilter{Bucket: filter.Bucket, Destination: filter.Destination}
@@ -98,7 +107,7 @@ func (c *DefaultClient) getWebhooks(client pb.WebhookClient, filter *pb.WebhookF
 	// calling the streaming API
 	stream, err := client.GetWebhooks(context.Background(), filter)
 	if err != nil {
-		log.Fatalf("Error on get customers: %v", err)
+		return fmt.Errorf("error while getting webhooks: %s", err)
 	}
 	for {
 		whRequest, err := stream.Recv()
@@ -106,7 +115,9 @@ func (c *DefaultClient) getWebhooks(client pb.WebhookClient, filter *pb.WebhookF
 			break
 		}
 		if err != nil {
-			log.Fatalf("%v.GetWebhooks(_) = _, %v", client, err)
+			log.WithFields(log.Fields{
+				"error": err,
+			}).Error("failed to get stream from server")
 			return err
 		}
 
@@ -116,9 +127,14 @@ func (c *DefaultClient) getWebhooks(client pb.WebhookClient, filter *pb.WebhookF
 				"error":       err,
 				"destination": whRequest.Request.Destination,
 				"method":      whRequest.Request.Method,
-			}).Error("webhooks stream handler: failed to relay webhook request")
+			}).Error("failed to relay webhook request")
+			continue
 		}
-		log.Printf("request: %v", whRequest)
+
+		log.WithFields(log.Fields{
+			"bucket":      whRequest.Bucket.Name,
+			"destination": whRequest.Request.Destination,
+		}).Info("webhook request relayed")
 	}
 
 	return nil

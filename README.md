@@ -14,12 +14,29 @@ Some common use cases:
 ## Quick start
 
 To start - register an account here https://webhookrelay.com/register. Then:
-1. Create a bucket
-2. Create an 'input' inside that bucket, it should look something like this "https://webhookrelay.com/v1/webhooks/1dbceb20-2626-48b3-ab89-d65dd81a9d07"
-3. Use that _input_ as an endpoint inside the system that will __produce__ that webhook. Think of an _input_ as your personal "inbox". I would like to advise 
+* 1. Create a bucket
+* 2. Create an 'input' inside that bucket, it should look something like this "https://webhookrelay.com/v1/webhooks/1dbceb20-2626-48b3-ab89-d65dd81a9d07"
+* 3. Use that _input_ as an endpoint inside the system that will __produce__ that webhook. Think of an _input_ as your personal "inbox". I would like to advise 
    using single _input_ per producer.
-4. Create an _output_. Output basically defines destination (where you want incomming webhook(-s) delivered).
-5. Go to tokens (https://webhookrelay.com/tokens) and generate a token for your agent
-6. Start _webhookrelayd_:
+* 4. Create an _output_. Output basically defines destination (where you want incomming webhook(-s) delivered).
+* 5. Go to tokens (https://webhookrelay.com/tokens) and generate a token for your agent
+* 6. Start _webhookrelayd_:
 
     ./webhookrelayd -k 4c7cff17-8726-431b-a6bc-82d6def0bdc8 -s Xf9DgBjhHjqH
+
+
+## Build
+
+    go build
+
+## Build Image 
+
+Building image is as simple as:
+
+    make image 
+
+
+Start it:
+
+    docker run -it webhookrelay/webhookrelayd -k 4c7cff17-8726-431b-a6bc-82d6def0bdc8 -s Xf9DgBjhHjqH
+    
