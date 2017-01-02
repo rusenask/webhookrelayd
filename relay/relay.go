@@ -2,6 +2,7 @@ package relay
 
 import (
 	"bytes"
+	"crypto/tls"
 	"net/http"
 
 	"github.com/hashicorp/go-retryablehttp"
@@ -32,12 +33,21 @@ type DefaultRelayer struct {
 
 // Opts - configuration
 type Opts struct {
-	Retries int
+	Retries  int
+	Insecure bool
 }
 
 // NewDefaultRelayer - create an instance of default relayer
 func NewDefaultRelayer(opts *Opts) *DefaultRelayer {
 	client := retryablehttp.NewClient()
+
+	if opts.Insecure {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		insecureClient := &http.Client{Transport: tr}
+		client.HTTPClient = insecureClient
+	}
 
 	client.RetryMax = opts.Retries
 

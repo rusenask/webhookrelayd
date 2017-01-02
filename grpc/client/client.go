@@ -7,9 +7,9 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	pb "github.com/rusenask/webhookrelayd/grpc/webhook"
-
 	"github.com/rusenask/webhookrelayd/relay"
 
 	log "github.com/Sirupsen/logrus"
@@ -32,6 +32,7 @@ const (
 
 type loginCreds struct {
 	AccessKey, AccessSecret string
+	RequireTLS              bool
 }
 
 func (c *loginCreds) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
@@ -42,12 +43,13 @@ func (c *loginCreds) GetRequestMetadata(context.Context, ...string) (map[string]
 }
 
 func (c *loginCreds) RequireTransportSecurity() bool {
-	return false
+	return c.RequireTLS
 }
 
 // Opts - client configuration
 type Opts struct {
 	Address, AccessKey, AccessSecret string
+	RequireTLS                       bool
 	Debug                            bool
 }
 
@@ -69,13 +71,19 @@ func NewDefaultClient(opts *Opts, relayer relay.Relayer) *DefaultClient {
 func (c *DefaultClient) StartRelay(filter *Filter) error {
 	// Set up a connection to the gRPC server.
 	opts := []grpc.DialOption{
-		grpc.WithInsecure(),
 		grpc.WithPerRPCCredentials(&loginCreds{
 			AccessKey:    c.opts.AccessKey,
 			AccessSecret: c.opts.AccessSecret,
+			RequireTLS:   c.opts.RequireTLS,
 		}),
 		grpc.WithTimeout(5 * time.Second),
 		grpc.WithBackoffMaxDelay(5 * time.Second),
+	}
+
+	if c.opts.RequireTLS {
+		opts = append(opts, grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")))
+	} else {
+		opts = append(opts, grpc.WithInsecure())
 	}
 
 	conn, err := grpc.Dial(c.opts.Address, opts...)

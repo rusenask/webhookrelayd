@@ -103,6 +103,7 @@ func TestDefaultClient(t *testing.T) {
 		Address:      fmt.Sprintf("localhost:%d", port),
 		AccessKey:    "dummy",
 		AccessSecret: "dummy",
+		RequireTLS:   false,
 	}
 	client := NewDefaultClient(clientOpts, dr)
 	err := client.StartRelay(&Filter{})
@@ -140,6 +141,7 @@ func TestDefaultClientWithError(t *testing.T) {
 		Address:      fmt.Sprintf("localhost:%d", port),
 		AccessKey:    "dummy",
 		AccessSecret: "dummy",
+		RequireTLS:   false,
 	}
 	client := NewDefaultClient(clientOpts, dr)
 	err := client.StartRelay(&Filter{})
@@ -171,6 +173,7 @@ func TestDefaultClientRelayerError(t *testing.T) {
 		Address:      fmt.Sprintf("localhost:%d", port),
 		AccessKey:    "dummy",
 		AccessSecret: "dummy",
+		RequireTLS:   false,
 	}
 	client := NewDefaultClient(clientOpts, dr)
 	err := client.StartRelay(&Filter{})
