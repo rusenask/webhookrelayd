@@ -41,7 +41,7 @@ func usage() {
 
 func main() {
 	// Server Options
-	opts := client.Opts{}
+	opts := client.Opts{RequireTLS: true}
 
 	rOpts := &relay.Opts{Retries: 5}
 
