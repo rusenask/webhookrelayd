@@ -7,6 +7,8 @@ import (
 
 	"github.com/rusenask/webhookrelayd/grpc/client"
 	"github.com/rusenask/webhookrelayd/relay"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // Version - client version
@@ -81,6 +83,5 @@ func main() {
 	relayer := relay.NewDefaultRelayer(rOpts)
 
 	c := client.NewDefaultClient(&opts, relayer)
-
-	c.StartRelay(&client.Filter{})
+	log.Fatal(c.StartRelay(&client.Filter{}))
 }

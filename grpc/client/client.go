@@ -7,9 +7,9 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	pb "github.com/rusenask/webhookrelayd/grpc/webhook"
-
 	"github.com/rusenask/webhookrelayd/relay"
 
 	log "github.com/Sirupsen/logrus"
@@ -42,7 +42,7 @@ func (c *loginCreds) GetRequestMetadata(context.Context, ...string) (map[string]
 }
 
 func (c *loginCreds) RequireTransportSecurity() bool {
-	return false
+	return true
 }
 
 // Opts - client configuration
@@ -69,7 +69,7 @@ func NewDefaultClient(opts *Opts, relayer relay.Relayer) *DefaultClient {
 func (c *DefaultClient) StartRelay(filter *Filter) error {
 	// Set up a connection to the gRPC server.
 	opts := []grpc.DialOption{
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")),
 		grpc.WithPerRPCCredentials(&loginCreds{
 			AccessKey:    c.opts.AccessKey,
 			AccessSecret: c.opts.AccessSecret,
