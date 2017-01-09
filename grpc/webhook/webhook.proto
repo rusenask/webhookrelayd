@@ -11,11 +11,13 @@ service Webhook {
 // Request message for creating a new customer
 message WebhookRequest {
 
+  string id = 1;  
+
   // bucket info
-  Bucket bucket = 1;
+  Bucket bucket = 2;
 
   // incomming request
-  Request request = 2;
+  Request request = 3;
 }
 
 // Bucket - bucket info
