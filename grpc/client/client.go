@@ -95,9 +95,6 @@ func (c *DefaultClient) StartRelay(filter *Filter) error {
 	c.conn = conn
 
 	client := pb.NewWebhookClient(conn)
-	log.WithFields(log.Fields{
-		"host": c.opts.Address,
-	}).Info("webhookrelayd: connected...")
 
 	fl := &pb.WebhookFilter{Bucket: filter.Bucket, Destination: filter.Destination}
 	return c.getWebhooks(client, fl)
@@ -109,6 +106,11 @@ func (c *DefaultClient) getWebhooks(client pb.WebhookClient, filter *pb.WebhookF
 	if err != nil {
 		return fmt.Errorf("error while getting webhooks: %s", err)
 	}
+
+	log.WithFields(log.Fields{
+		"host": c.opts.Address,
+	}).Info("connected...")
+
 	for {
 		whRequest, err := stream.Recv()
 		if err == io.EOF {

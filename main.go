@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/rusenask/webhookrelayd/grpc/client"
 	"github.com/rusenask/webhookrelayd/relay"
@@ -83,5 +84,16 @@ func main() {
 	relayer := relay.NewDefaultRelayer(rOpts)
 
 	c := client.NewDefaultClient(&opts, relayer)
-	log.Fatal(c.StartRelay(&client.Filter{}))
+
+RESTART:
+	err := c.StartRelay(&client.Filter{})
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Warn("got error while connecting to gRPC service, reconnecting")
+		time.Sleep(1 * time.Second)
+		goto RESTART
+	}
+
+	return
 }
