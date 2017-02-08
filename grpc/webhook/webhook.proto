@@ -18,10 +18,23 @@ message WebhookRequest {
 
   // incomming request
   Request request = 3;
+
+  Input input = 4;
+  Output output = 5;
 }
 
 // Bucket - bucket info
 message Bucket {
+    string id = 1;
+    string name = 2;
+}
+
+message Input {
+    string id = 1;
+    string name = 2;
+}
+
+message Output {
     string id = 1;
     string name = 2;
 }
